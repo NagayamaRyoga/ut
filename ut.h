@@ -21,7 +21,6 @@
 
 #ifndef UT_NO_ALIASES
 #    define TEST UT_TEST
-#    define REGISTER UT_REGISTER
 #    define BEFORE_EACH UT_BEFORE_EACH
 #    define AFTER_EACH UT_AFTER_EACH
 #    define SUBTEST UT_SUBTEST
@@ -126,25 +125,22 @@ static inline void ut_tester_fail(ut_tester_t *t, const char *file, unsigned lon
 #define UT_ACTUAL _0
 #define UT_TEST_FUNC(tname) ut_test_##tname##_run
 #define UT_TEST_INIT(tname) ut_test_##tname##_init
-#define UT_TEST_DATA(tname) ut_test_##tname##_data
 
 #define UT_TEST(tname) UT_TEST_I(UT_TESTER, tname)
 #define UT_TEST_I(t, tname)                                                                                                                                                                            \
     static void UT_TEST_FUNC(tname)(ut_tester_t * (t));                                                                                                                                                \
-    static void UT_TEST_INIT(tname)(void) UT_GNU_ATTR((constructor));                                                                                                                                  \
-    static ut_test_def_t UT_TEST_DATA(tname) = {                                                                                                                                                       \
-        .next = NULL,                                                                                                                                                                                  \
-        .testname = #tname,                                                                                                                                                                            \
-        .file = __FILE__,                                                                                                                                                                              \
-        .line = __LINE__,                                                                                                                                                                              \
-        .run = &UT_TEST_FUNC(tname),                                                                                                                                                                   \
-    };                                                                                                                                                                                                 \
-    static void UT_TEST_INIT(tname)(void) {                                                                                                                                                            \
-        UT_REGISTER(tname);                                                                                                                                                                            \
+    UT_GNU_ATTR((constructor)) static void UT_TEST_INIT(tname)(void) {                                                                                                                                 \
+        static ut_test_def_t test_def = {                                                                                                                                                              \
+            .next = NULL,                                                                                                                                                                              \
+            .testname = #tname,                                                                                                                                                                        \
+            .file = __FILE__,                                                                                                                                                                          \
+            .line = __LINE__,                                                                                                                                                                          \
+            .run = &UT_TEST_FUNC(tname),                                                                                                                                                               \
+        };                                                                                                                                                                                             \
+        ut_register(&test_def);                                                                                                                                                                        \
     }                                                                                                                                                                                                  \
     static void UT_TEST_FUNC(tname)(UT_GNU_ATTR((unused)) ut_tester_t * (t))
 
-#define UT_REGISTER(tname) ut_register(&UT_TEST_DATA(tname));
 #define UT_BEFORE_EACH(setup) ut_before_each((setup))
 #define UT_AFTER_EACH(teardown) ut_after_each((teardown))
 
